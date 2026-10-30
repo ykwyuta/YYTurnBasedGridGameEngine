@@ -23,6 +23,23 @@
 
   const cells = [];
 
+  // ユニット・建物のアイコン（32×32 の線画 SVG）
+  const ICON_PATHS = {
+    infantry: '<circle cx="14" cy="7" r="3.6"/><path d="M8 29v-9.5a6 6 0 0 1 12 0V29"/><path d="M11 29v-5M17 29v-5"/><path d="M19 17l9-9M25 8l3 3"/>',
+    drone: '<rect x="12.5" y="12.5" width="7" height="7" rx="1.5"/><path d="M12.5 12.5 9 9M19.5 12.5 23 9M12.5 19.5 9 23M19.5 19.5 23 23"/><ellipse cx="7" cy="7" rx="4.5" ry="1.6"/><ellipse cx="25" cy="7" rx="4.5" ry="1.6"/><ellipse cx="7" cy="25" rx="4.5" ry="1.6"/><ellipse cx="25" cy="25" rx="4.5" ry="1.6"/><circle cx="16" cy="16" r="1" fill="currentColor"/>',
+    artillery: '<rect x="4" y="19" width="22" height="7" rx="3.5"/><path d="M9 19v-4h10v4"/><path d="M17 15 28 5"/><path d="M25 4l4 4"/><circle cx="9" cy="22.5" r="1.3"/><circle cx="15" cy="22.5" r="1.3"/><circle cx="21" cy="22.5" r="1.3"/>',
+    tank: '<rect x="3" y="17" width="26" height="9" rx="4.5"/><path d="M8 17v-4l3-3h8l3 3v4"/><path d="M19 12h11"/><circle cx="8" cy="21.5" r="1.5"/><circle cx="16" cy="21.5" r="1.5"/><circle cx="24" cy="21.5" r="1.5"/>',
+    missile: '<path d="M16 2.5c4 4 5.5 9 5.5 14V23h-11v-6.5c0-5 1.5-10 5.5-14z"/><path d="M10.5 18 6 23.5V27l4.5-2.5M21.5 18l4.5 5.5V27l-4.5-2.5"/><path d="M13.5 26.5 16 30l2.5-3.5"/><circle cx="16" cy="11.5" r="2"/>',
+    factory: '<path d="M3 28V15l7 4.5V15l7 4.5V15l7 4.5V5h4v23z"/><path d="M8 24h3M14 24h3M20 24h3"/>',
+    capital: '<path d="M16 2.5 28 9.5v13L16 29.5 4 22.5v-13z"/><path d="M16 9l6 3.5v7L16 23l-6-3.5v-7z"/><circle cx="16" cy="16" r="2" fill="currentColor"/>',
+  };
+  function icon(key, cls) {
+    return `<svg class="ico ${cls || ''}" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON_PATHS[key]}</svg>`;
+  }
+  function token(type, owner, extra) {
+    return `<span class="token p${owner}${extra || ''}"><span class="hex">${icon(type)}</span></span>`;
+  }
+
   // ---------- 初期化 ----------
 
   function init() {
@@ -85,7 +102,7 @@
     let h = '<thead><tr><th>駒</th><th>コスト</th><th>耐久</th><th>移動</th><th>攻撃</th><th>特徴</th></tr></thead><tbody>';
     for (const k of E.UNIT_ORDER) {
       const t = UT[k];
-      h += `<tr><td class="ut-name"><span class="mini-piece">${t.glyph}</span>${t.name}</td><td>${t.cost}</td><td>${t.hp}</td>` +
+      h += `<tr><td class="ut-name">${token(k, 0, ' mini')}${t.name}</td><td>${t.cost}</td><td>${t.hp}</td>` +
         `<td>${t.move}</td><td>${t.attack}</td><td>${t.note}</td></tr>`;
     }
     $('unit-table').innerHTML = h + '</tbody>';
@@ -119,13 +136,12 @@
   }
 
   function renderLabels() {
-    const ZEN = '０１２３４５６７８９', KAN = '〇一二三四五六七八九';
     let f = '', r = '';
     for (let v = 0; v < E.SIZE; v++) {
       const x = app.flip ? E.SIZE - 1 - v : v;
       const y = app.flip ? E.SIZE - 1 - v : v;
-      f += `<span>${ZEN[E.SIZE - x]}</span>`;
-      r += `<span>${KAN[y + 1]}</span>`;
+      f += `<span>${'ABCDEFGHI'[x]}</span>`;
+      r += `<span>${E.SIZE - y}</span>`;
     }
     $('files').innerHTML = f;
     $('ranks').innerHTML = r;
@@ -233,13 +249,12 @@
         c.className = cls.join(' ');
 
         let html = '';
-        if (G.terrain[i] === 'M') html += '<span class="mtn-mark">▲</span>';
-        if (b) html += `<span class="bld-label">${b === 'C' ? '都' : '工'}</span>`;
+        if (G.terrain[i] === 'M') html += '<span class="tower"></span>';
+        if (b) html += `<span class="bld-label">${icon(b === 'C' ? 'capital' : 'factory', 'bld-ico')}<em>${b === 'C' ? 'HQ' : 'FAB'}</em></span>`;
         if (u) {
           const T = UT[u.type];
-          const facing = (u.owner === 1) !== app.flip ? ' rev' : '';
           const done = u.owner === G.cur && (u.fresh || G.actedIds.includes(u.id)) ? ' done' : '';
-          html += `<div class="piece p${u.owner}${facing}${done}${T.air ? ' air' : ''}"><span class="glyph">${T.glyph}</span></div>`;
+          html += `<div class="unit">${token(u.type, u.owner, done + (T.air ? ' air' : ''))}</div>`;
           let pips = '';
           for (let k = 0; k < T.hp; k++) pips += `<i class="${k < u.hp ? 'on' : ''}"></i>`;
           html += `<div class="hp p${u.owner}">${pips}</div>`;
@@ -258,7 +273,7 @@
       bar.className = `player-bar p${p}${active ? ' active' : ''}`;
       bar.innerHTML =
         `<span class="pname">${E.P_NAMES[p]}<small>${who}</small></span>` +
-        `<span class="stat" title="資金">💰 <b>${G.funds[p]}</b></span>` +
+        `<span class="stat" title="資金">CR <b>${G.funds[p]}</b></span>` +
         `<span class="stat" title="1ターンあたりの収入">収入 <b>+${E.income(G, p)}</b></span>` +
         `<span class="stat" title="所有工場数">工場 <b>${E.factoryCount(G, p)}</b></span>` +
         `<span class="stat" title="駒の数 / 上限">駒 <b>${E.unitCount(G, p)}</b>/${E.MAX_UNITS}</span>`;
@@ -283,9 +298,9 @@
     } else if (!app.human[p]) {
       hint = 'CPU が考えています…';
     } else if (G.movedUid !== null) {
-      hint = '移動した駒で攻撃する相手（赤枠）を選ぶか、「待機」を押してください。';
+      hint = '移動した駒で攻撃する相手（赤い照準）を選ぶか、「待機」を押してください。';
     } else if (app.sel && app.sel.kind === 'produce') {
-      hint = `${UT[app.sel.type].name}を置くマス（青い点）を選んでください。`;
+      hint = `${UT[app.sel.type].name}を置くマス（光っているマス）を選んでください。`;
     } else if (app.sel && app.sel.kind === 'launch') {
       hint = 'ミサイルの着弾地点を選んでください（オレンジ）。縦横に隣接するマスも巻き込みます。';
     } else if (G.actionsLeft > 0) {
@@ -315,7 +330,7 @@
       const can = humanTurn() && T.cost <= G.funds[p] && E.placeCells(G, p, k).length > 0;
       const on = app.sel && app.sel.kind === 'produce' && app.sel.type === k;
       h += `<button type="button" class="prod p${p}${on ? ' on' : ''}" data-type="${k}" ${can ? '' : 'disabled'}>` +
-        `<span class="mini-piece">${T.glyph}</span><span class="pn">${T.name}</span><span class="cost">${T.cost}</span></button>`;
+        `${token(k, p, ' mini')}<span class="pn">${T.name}</span><span class="cost">${T.cost}</span></button>`;
     }
     list.innerHTML = h;
     list.querySelectorAll('button.prod').forEach(btn => btn.addEventListener('click', () => {
@@ -375,7 +390,7 @@
   function unitCard(T, u) {
     const owner = u ? `<span class="tag p${u.owner}">${E.P_NAMES[u.owner]}</span>` : '<span class="tag">生産</span>';
     const hp = u ? `${u.hp} / ${T.hp}` : `${T.hp}`;
-    return `<div class="unit-card"><div class="uc-head"><span class="mini-piece">${T.glyph}</span><b>${T.name}</b>${owner}</div>` +
+    return `<div class="unit-card"><div class="uc-head">${token(T.key, u ? u.owner : app.G.cur, ' mini')}<b>${T.name}</b>${owner}</div>` +
       `<dl><dt>耐久</dt><dd>${hp}</dd><dt>コスト</dt><dd>${T.cost}</dd><dt>移動</dt><dd>${T.move}</dd><dt>攻撃</dt><dd>${T.attack}</dd></dl>` +
       `<p class="note">${T.note}</p></div>`;
   }
@@ -383,7 +398,7 @@
   function cellDesc(G, i) {
     const x = i % E.SIZE, y = (i / E.SIZE) | 0;
     const parts = [E.coordName(x, y)];
-    if (G.terrain[i] === 'M') parts.push('山（地上の駒は進入不可）');
+    if (G.terrain[i] === 'M') parts.push('ビル群（地上の駒は進入不可）');
     if (G.building[i]) {
       const own = G.owner[i] < 0 ? '中立' : E.P_NAMES[G.owner[i]];
       parts.push(`${G.building[i] === 'C' ? '首都' : '工場'}（${own}）`);

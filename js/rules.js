@@ -15,27 +15,27 @@
 
   const UNIT_TYPES = {
     infantry: {
-      key: 'infantry', name: '歩兵', glyph: '歩', cost: 2, hp: 1, atk: 1, air: false, vehicle: false,
+      key: 'infantry', name: '歩兵', cost: 2, hp: 1, atk: 1, air: false, vehicle: false,
       move: '縦横に1マス', attack: '周囲8マス（攻撃力1）',
       note: '建物（工場・首都）を占領できる唯一の駒。自マスに塹壕を掘れる。ドローンを攻撃できる。',
     },
     drone: {
-      key: 'drone', name: 'ドローン', glyph: '機', cost: 3, hp: 1, atk: 1, air: true, vehicle: false,
-      move: '距離3以内の好きなマスへ飛行（駒・山を飛び越える）', attack: '周囲8マス（車両に2、他に1）',
+      key: 'drone', name: 'ドローン', cost: 3, hp: 1, atk: 1, air: true, vehicle: false,
+      move: '距離3以内の好きなマスへ飛行（駒・ビル群を飛び越える）', attack: '周囲8マス（車両に2、他に1）',
       note: '塹壕の防御を無視。戦車・自走砲からは攻撃されない。歩兵に弱い。',
     },
     artillery: {
-      key: 'artillery', name: '自走砲', glyph: '砲', cost: 5, hp: 2, atk: 2, air: false, vehicle: true,
+      key: 'artillery', name: '自走砲', cost: 5, hp: 2, atk: 2, air: false, vehicle: true,
       move: '周囲8方向に1マス', attack: 'ちょうど距離2のマスを砲撃（攻撃力2）',
-      note: '間接射撃なので間に駒や山があっても撃てる。隣接マスとドローンは撃てない。',
+      note: '間接射撃なので間に駒やビル群があっても撃てる。隣接マスとドローンは撃てない。',
     },
     tank: {
-      key: 'tank', name: '戦車', glyph: '戦', cost: 6, hp: 3, atk: 2, air: false, vehicle: true,
+      key: 'tank', name: '戦車', cost: 6, hp: 3, atk: 2, air: false, vehicle: true,
       move: '縦横に最大2マス直進（飛び越え不可）', attack: '周囲8マス（攻撃力2）',
       note: '高耐久の主力。塹壕マスには進入できない。ドローンは攻撃できない。',
     },
     missile: {
-      key: 'missile', name: 'ミサイル', glyph: '弾', cost: 7, hp: 1, atk: 3, air: false, vehicle: true,
+      key: 'missile', name: 'ミサイル', cost: 7, hp: 1, atk: 3, air: false, vehicle: true,
       move: '縦横に1マス', attack: '距離4以内の任意のマスへ発射（使い捨て）',
       note: '着弾マスに3ダメージ（塹壕無視・塹壕破壊）、縦横に隣接するマスに1ダメージ。味方も巻き込む。',
     },
@@ -60,15 +60,14 @@
     ],
   };
 
-  const ZEN = ['０', '１', '２', '３', '４', '５', '６', '７', '８', '９'];
-  const KAN = ['〇', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
+  const FILES = 'ABCDEFGHI';
 
   function idx(x, y) { return y * SIZE + x; }
   function inB(x, y) { return x >= 0 && y >= 0 && x < SIZE && y < SIZE; }
   function cheb(ax, ay, bx, by) { return Math.max(Math.abs(ax - bx), Math.abs(ay - by)); }
   function manh(ax, ay, bx, by) { return Math.abs(ax - bx) + Math.abs(ay - by); }
-  // 将棋式の座標表記（筋は右から１〜９、段は上から一〜九）
-  function coordName(x, y) { return ZEN[SIZE - x] + KAN[y + 1]; }
+  // 座標表記：列は左から A〜I、行は青軍側（下）から 1〜9
+  function coordName(x, y) { return FILES[x] + (SIZE - y); }
 
   function newGame() {
     const terrain = new Array(N).fill('P');

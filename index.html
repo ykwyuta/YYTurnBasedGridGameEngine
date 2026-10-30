@@ -4,12 +4,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>鉄盤戦線</title>
-  <meta name="description" content="将棋のように交互に指すターン制の戦略ボードゲーム。工場を奪って生産力を伸ばし、敵の首都を占領せよ。">
+  <meta name="description" content="交互に指すターン制のサイバーパンク戦略ボードゲーム。工場を奪って生産力を伸ばし、敵の首都を占領せよ。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&display=swap">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <header class="topbar">
-    <h1>鉄盤戦線 <small>TETSUBAN SENSEN</small></h1>
+    <h1><span class="logo-jp">鉄盤戦線</span> <small>TETSUBAN//SENSEN</small></h1>
     <nav class="top-actions">
       <button id="btn-new" type="button">新しいゲーム</button>
       <button id="btn-rules" type="button">ルール</button>
@@ -94,11 +97,11 @@
       <section>
         <h3>建物と地形</h3>
         <ul>
-          <li><b>首都（都）</b>：収入源で生産拠点。占領されると負け。</li>
-          <li><b>工場（工）</b>：歩兵が入ると占領でき、収入と生産拠点が1つ増える。奪い返されることもある。</li>
+          <li><b>首都（HQ）</b>：収入源で生産拠点。占領されると負け。</li>
+          <li><b>工場（FAB）</b>：歩兵が入ると占領でき、収入と生産拠点が1つ増える。奪い返されることもある。</li>
           <li><b>包囲</b>：建物の周囲8マスに敵の駒がいると、その建物では生産できない。</li>
           <li><b>塹壕</b>：歩兵が自分のマスに掘る（1行動）。中にいる地上の駒は、歩兵・戦車・自走砲から受けるダメージが1減る。戦車は塹壕に入れない。</li>
-          <li><b>山（▲）</b>：地上の駒は入れない。ドローンは飛び越えられ、砲撃は山越しに届く。</li>
+          <li><b>ビル群</b>：地上の駒は入れない。ドローンは飛び越えられ、砲撃はビル越しに届く。</li>
         </ul>
       </section>
       <section>
@@ -108,9 +111,9 @@
       <section>
         <h3>操作</h3>
         <ul>
-          <li>自分の駒をクリック → 緑の点：移動、赤枠：攻撃できる相手。</li>
-          <li>生産パネルで駒を選ぶ → 青い点のマスをクリックで配置。</li>
-          <li>敵の駒をクリックすると、その駒の移動範囲（薄い点）と攻撃範囲を確認できる。</li>
+          <li>自分の駒をクリック → 緑の枠：移動、赤い照準：攻撃できる相手。</li>
+          <li>生産パネルで駒を選ぶ → 光っているマスをクリックで配置。</li>
+          <li>敵の駒をクリックすると、その駒の移動範囲（薄い枠）と攻撃範囲を確認できる。</li>
           <li>Esc キーで選択を解除。</li>
         </ul>
       </section>
