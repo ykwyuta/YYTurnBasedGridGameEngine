@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>鉄盤戦線</title>
+  <meta name="description" content="交互に指すターン制のサイバーパンク戦略ボードゲーム。工場を奪って生産力を伸ばし、敵の首都を占領せよ。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&display=swap">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1><span class="logo-jp">鉄盤戦線</span> <small>TETSUBAN//SENSEN</small></h1>
+    <nav class="top-actions">
+      <button id="btn-new" type="button">新しいゲーム</button>
+      <button id="btn-rules" type="button">ルール</button>
+    </nav>
+  </header>
+
+  <main class="layout">
+    <section class="board-area" aria-label="盤面">
+      <div class="player-bar" id="bar-1"></div>
+      <div class="board-frame">
+        <div class="files" id="files"></div>
+        <div class="board-row">
+          <div id="board" class="board" role="grid"></div>
+          <div class="ranks" id="ranks"></div>
+        </div>
+      </div>
+      <div class="player-bar" id="bar-0"></div>
+    </section>
+
+    <aside class="side">
+      <div class="panel" id="turn-panel"></div>
+      <div class="panel">
+        <h2>生産 <span class="sub" id="produce-sub"></span></h2>
+        <div id="produce-list" class="produce-list"></div>
+      </div>
+      <div class="panel">
+        <h2>選択中</h2>
+        <div id="info" class="info"></div>
+        <div id="unit-actions" class="unit-actions"></div>
+      </div>
+      <div class="turn-buttons">
+        <button id="btn-end" class="primary" type="button">ターン終了</button>
+        <button id="btn-resign" type="button">投了</button>
+      </div>
+      <div class="panel log-panel">
+        <h2>戦況ログ</h2>
+        <ol id="log"></ol>
+      </div>
+    </aside>
+  </main>
+
+  <dialog id="dlg-new">
+    <form method="dialog" class="dlg">
+      <h2>新しいゲーム</h2>
+      <fieldset>
+        <legend>対戦モード</legend>
+        <label><input type="radio" name="mode" value="cpu0" checked> <span id="mode-cpu0"></span></label>
+        <label><input type="radio" name="mode" value="cpu1"> <span id="mode-cpu1"></span></label>
+        <label><input type="radio" name="mode" value="hot"> 二人で対戦（同じ画面で交互に）</label>
+        <label><input type="radio" name="mode" value="watch"> CPU 同士の対戦を観戦</label>
+      </fieldset>
+      <fieldset>
+        <legend>CPU の強さ</legend>
+        <label><input type="radio" name="level" value="easy"> やさしい</label>
+        <label><input type="radio" name="level" value="normal" checked> ふつう</label>
+        <label><input type="radio" name="level" value="hard"> つよい</label>
+      </fieldset>
+      <div class="dlg-buttons">
+        <button value="cancel" type="submit">キャンセル</button>
+        <button value="ok" class="primary" type="submit">開始</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="dlg-rules">
+    <form method="dialog" class="dlg rules">
+      <h2>ルール</h2>
+      <section>
+        <h3>陣営</h3>
+        <ul id="rule-factions"></ul>
+      </section>
+      <section>
+        <h3>勝利条件</h3>
+        <p>自軍の<b>歩兵</b>を敵の<b>首都</b>マスに進めて占領すれば勝ち。駒を取っても持ち駒にはならず、盤上から消えるだけ。戦力は<b>工場で生産</b>して補充する。</p>
+        <p><span id="rule-rounds"></span>ラウンド経過しても決着がつかない場合は、資金・収入・残存戦力の合計で判定。</p>
+      </section>
+      <section>
+        <h3>手番の流れ</h3>
+        <ol>
+          <li>手番開始時に収入を得る（首都 +<span id="rule-cap-inc"></span>、所有工場1つにつき +<span id="rule-fac-inc"></span>）。自軍の建物の上にいる駒は耐久が1回復する。</li>
+          <li><b>行動</b>：違う駒を最大<span id="rule-actions"></span>回動かせる。歩兵・戦車・ドローンは「移動してから攻撃」までが1回の行動。自走砲・ミサイルは移動か攻撃のどちらか一方。</li>
+          <li><b>生産</b>：自軍の首都・工場は<b>1つにつき1ターン1体</b>生産できる。置けるのは建物のマスかその周囲8マス。生産した駒はそのターンは動けない。</li>
+          <li>「ターン終了」で相手の番へ。</li>
+        </ol>
+      </section>
+      <section>
+        <h3>建物と地形</h3>
+        <ul>
+          <li><b>首都（HQ）</b>：収入源で生産拠点。占領されると負け。</li>
+          <li><b>工場（FAB）</b>：歩兵が入ると占領でき、収入と生産拠点が1つ増える。奪い返されることもある。</li>
+          <li><b>包囲</b>：建物の周囲8マスに敵の駒がいると、その建物では生産できない。</li>
+          <li><b>塹壕</b>：歩兵が自分のマスに掘る（1行動）。中にいる地上の駒は、歩兵・戦車・自走砲から受けるダメージが1減る。戦車は塹壕に入れない。</li>
+          <li><b>ビル群</b>：地上の駒は入れない。ドローンは飛び越えられ、砲撃はビル越しに届く。</li>
+        </ul>
+      </section>
+      <section>
+        <h3>駒</h3>
+        <table class="unit-table" id="unit-table"></table>
+      </section>
+      <section>
+        <h3>操作</h3>
+        <ul>
+          <li>自分の駒をクリック → 緑の枠：移動、赤い照準：攻撃できる相手。</li>
+          <li>生産パネルで駒を選ぶ → 光っているマスをクリックで配置。</li>
+          <li>敵の駒をクリックすると、その駒の移動範囲（薄い枠）と攻撃範囲を確認できる。</li>
+          <li>Esc キーで選択を解除。</li>
+        </ul>
+      </section>
+      <div class="dlg-buttons"><button class="primary" value="close" type="submit">閉じる</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="dlg-result">
+    <form method="dialog" class="dlg result">
+      <h2 id="result-title"></h2>
+      <p id="result-text"></p>
+      <div class="dlg-buttons">
+        <button value="close" type="submit">盤面を見る</button>
+        <button value="new" class="primary" type="submit">もう一局</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="js/rules.js"></script>
+  <script src="js/ai.js"></script>
+  <script src="js/ui.js"></script>
+</body>
+</html>

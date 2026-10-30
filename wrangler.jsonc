@@ -1,0 +1,10 @@
+// Cloudflare Workers（静的アセット）で配信するための設定
+// ビルド不要。リポジトリのルートをそのままサイトとして公開する。
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "tetsuban-sensen",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./"
+  }
+}
