@@ -123,7 +123,7 @@ Cloudflare Workers の静的アセット配信を使います。ビルドは不�
 
 ### 方法 A：GitHub と連携して自動デプロイ（おすすめ）
 
-1. このブランチを `main` にマージしておく（公開したいブランチを本番ブランチにする）。
+1. ゲーム本体と `wrangler.jsonc` が入ったブランチを、Cloudflare がビルドする本番ブランチにしておく（このリポジトリの既定ブランチは `master`。ここにマージするか、Cloudflare 側の本番ブランチを変更する）。
 2. [Cloudflare ダッシュボード](https://dash.cloudflare.com/) にログイン（無料アカウントで OK）→ **Workers & Pages** → **作成（Create）** → **リポジトリをインポート（Import a repository）**。
 3. GitHub を連携して `YYTurnBasedGridGameEngine` を選ぶ。
 4. 設定はそのままで構いません。
@@ -132,7 +132,10 @@ Cloudflare Workers の静的アセット配信を使います。ビルドは不�
    - ルートディレクトリ：`/`
 5. **デプロイ** を押すと `https://tetsuban-sensen.<あなたのサブドメイン>.workers.dev` で公開されます。
 
-以降は本番ブランチに push するたびに自動で再デプロイされます。独自ドメインを使う場合は、Worker の **設定 → ドメインとルート** から追加します。
+以降は本番ブランチに push するたびに自動で再デプロイされます。
+
+> **`Could not detect a directory containing static files` で失敗する場合**
+> Cloudflare がビルドしたブランチに `wrangler.jsonc` が入っていません（README だけの `master` をビルドしたときなど）。ゲームを含むブランチをマージするか、Worker の **設定 → ビルド → ブランチ管理** で本番ブランチを切り替えてから再デプロイしてください。独自ドメインを使う場合は、Worker の **設定 → ドメインとルート** から追加します。
 
 ### 方法 B：手元のパソコンからコマンドで公開
 
