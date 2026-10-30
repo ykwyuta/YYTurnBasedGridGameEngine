@@ -99,6 +99,10 @@
     $('rule-cap-inc').textContent = E.CAPITAL_INCOME;
     $('rule-fac-inc').textContent = E.FACTORY_INCOME;
     $('rule-actions').textContent = E.ACTIONS_PER_TURN;
+    $('mode-cpu0').textContent = `CPU と対戦（あなたが${E.P_NAMES[0]}・先手）`;
+    $('mode-cpu1').textContent = `CPU と対戦（あなたが${E.P_NAMES[1]}・後手）`;
+    $('rule-factions').innerHTML = E.FACTIONS.map((f, p) =>
+      `<li><b class="fc p${p}">${f.name}</b> <small>${f.en}</small>（${p === 0 ? 'シアン・先手' : 'マゼンタ・後手'}）— ${f.desc}</li>`).join('');
     let h = '<thead><tr><th>駒</th><th>コスト</th><th>耐久</th><th>移動</th><th>攻撃</th><th>特徴</th></tr></thead><tbody>';
     for (const k of E.UNIT_ORDER) {
       const t = UT[k];
@@ -272,7 +276,7 @@
       const active = G.cur === p && G.winner === null;
       bar.className = `player-bar p${p}${active ? ' active' : ''}`;
       bar.innerHTML =
-        `<span class="pname">${E.P_NAMES[p]}<small>${who}</small></span>` +
+        `<span class="pname">${E.P_NAMES[p]}<small class="en">${E.FACTIONS[p].en}</small><small>${who}</small></span>` +
         `<span class="stat" title="資金">CR <b>${G.funds[p]}</b></span>` +
         `<span class="stat" title="1ターンあたりの収入">収入 <b>+${E.income(G, p)}</b></span>` +
         `<span class="stat" title="所有工場数">工場 <b>${E.factoryCount(G, p)}</b></span>` +
@@ -416,7 +420,7 @@
     const log = $('log');
     for (const e of events) {
       const li = document.createElement('li');
-      li.className = 'ev-' + e.kind + (e.text.startsWith('青') || e.text.includes('― 青') ? ' l0' : e.text.startsWith('赤') || e.text.includes('― 赤') ? ' l1' : '');
+      li.className = 'ev-' + e.kind + (e.p === 0 || e.p === 1 ? ' l' + e.p : '');
       li.textContent = e.text;
       log.prepend(li);
     }
@@ -564,7 +568,7 @@
       if (solo) title = app.human[G.winner] ? 'あなたの勝利！' : 'CPU の勝利…';
       else title = `${E.P_NAMES[G.winner]}の勝利！`;
       text = `${E.P_NAMES[G.winner]}が${reason}`;
-      if (G.result === 'judge') text += `（青 ${E.score(G, 0).toFixed(1)} : 赤 ${E.score(G, 1).toFixed(1)}）`;
+      if (G.result === 'judge') text += `（${E.P_NAMES[0]} ${E.score(G, 0).toFixed(1)} : ${E.P_NAMES[1]} ${E.score(G, 1).toFixed(1)}）`;
     }
     $('result-title').textContent = title;
     $('result-text').textContent = text;

@@ -59,8 +59,8 @@
       <h2>新しいゲーム</h2>
       <fieldset>
         <legend>対戦モード</legend>
-        <label><input type="radio" name="mode" value="cpu0" checked> CPU と対戦（あなたが青軍・先手）</label>
-        <label><input type="radio" name="mode" value="cpu1"> CPU と対戦（あなたが赤軍・後手）</label>
+        <label><input type="radio" name="mode" value="cpu0" checked> <span id="mode-cpu0"></span></label>
+        <label><input type="radio" name="mode" value="cpu1"> <span id="mode-cpu1"></span></label>
         <label><input type="radio" name="mode" value="hot"> 二人で対戦（同じ画面で交互に）</label>
         <label><input type="radio" name="mode" value="watch"> CPU 同士の対戦を観戦</label>
       </fieldset>
@@ -80,6 +80,10 @@
   <dialog id="dlg-rules">
     <form method="dialog" class="dlg rules">
       <h2>ルール</h2>
+      <section>
+        <h3>陣営</h3>
+        <ul id="rule-factions"></ul>
+      </section>
       <section>
         <h3>勝利条件</h3>
         <p>自軍の<b>歩兵</b>を敵の<b>首都</b>マスに進めて占領すれば勝ち。駒を取っても持ち駒にはならず、盤上から消えるだけ。戦力は<b>工場で生産</b>して補充する。</p>

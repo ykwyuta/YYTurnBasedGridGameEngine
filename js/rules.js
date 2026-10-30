@@ -11,7 +11,12 @@
   const MAX_UNITS = 16;
   const MAX_ROUNDS = 80;
   const ACTIONS_PER_TURN = 2;
-  const P_NAMES = ['青軍', '赤軍'];
+  // 陣営（0 = シアン・先手 / 1 = マゼンタ・後手）。名前を変えるときはここだけ直せばよい
+  const FACTIONS = [
+    { name: 'アークライト社', en: 'ARCLIGHT CORP.', desc: '都市を支配する巨大企業。警備部隊と自律兵器で秩序を敷く。' },
+    { name: '緋蛇会', en: 'HIDAKAI SYNDICATE', desc: '地下ネットと闇市場を牛耳るサイバー極道。改造兵器で企業支配に抗う。' },
+  ];
+  const P_NAMES = FACTIONS.map(f => f.name);
 
   const UNIT_TYPES = {
     infantry: {
@@ -47,7 +52,7 @@
   const DIR4 = [[0, -1], [1, 0], [0, 1], [-1, 0]];
   const DIR8 = DIR4.concat([[1, -1], [1, 1], [-1, 1], [-1, -1]]);
 
-  // 盤面は (x, y) → (8-x, 8-y) の点対称。青軍が下側（y=8）。
+  // 盤面は (x, y) → (8-x, 8-y) の点対称。陣営 0 が下側（y=8）。
   const MAP = {
     mountains: [[2, 2], [6, 6], [6, 3], [2, 5]],
     neutralFactories: [[1, 4], [4, 4], [7, 4]],
@@ -66,7 +71,7 @@
   function inB(x, y) { return x >= 0 && y >= 0 && x < SIZE && y < SIZE; }
   function cheb(ax, ay, bx, by) { return Math.max(Math.abs(ax - bx), Math.abs(ay - by)); }
   function manh(ax, ay, bx, by) { return Math.abs(ax - bx) + Math.abs(ay - by); }
-  // 座標表記：列は左から A〜I、行は青軍側（下）から 1〜9
+  // 座標表記：列は左から A〜I、行は陣営 0 の側（下）から 1〜9
   function coordName(x, y) { return FILES[x] + (SIZE - y); }
 
   function newGame() {
@@ -346,7 +351,7 @@
   // ---- 状態遷移 ----
 
   function ev(s, kind, text, x, y, extra) {
-    s.events.push(Object.assign({ kind, text, x, y }, extra || {}));
+    s.events.push(Object.assign({ kind, text, x, y, p: s.cur }, extra || {}));
   }
 
   function hit(s, target, dmg) {
@@ -461,7 +466,7 @@
       const a = score(n, 0), b = score(n, 1);
       n.winner = a > b ? 0 : b > a ? 1 : -1;
       n.result = 'judge';
-      ev(n, 'turn', `${MAX_ROUNDS}ラウンド経過。判定 青${a.toFixed(1)} : 赤${b.toFixed(1)}`);
+      ev(n, 'turn', `${MAX_ROUNDS}ラウンド経過。判定 ${P_NAMES[0]} ${a.toFixed(1)} : ${P_NAMES[1]} ${b.toFixed(1)}`);
       return n;
     }
     startTurn(n);
@@ -477,7 +482,7 @@
   }
 
   global.Engine = {
-    SIZE, N, MAX_UNITS, MAX_ROUNDS, ACTIONS_PER_TURN, CAPITAL_INCOME, FACTORY_INCOME, P_NAMES, UNIT_TYPES, UNIT_ORDER, MOVE_THEN_ATTACK, DIR4, DIR8,
+    FACTIONS, SIZE, N, MAX_UNITS, MAX_ROUNDS, ACTIONS_PER_TURN, CAPITAL_INCOME, FACTORY_INCOME, P_NAMES, UNIT_TYPES, UNIT_ORDER, MOVE_THEN_ATTACK, DIR4, DIR8,
     idx, inB, cheb, manh, coordName,
     newGame, clone, unitAt, unitById, occGrid, income, factoryCount, unitCount,
     moveTargets, attackTargets, launchTargets, missileImpact, canDig, canHit, damageOf, placeCells, isSieged, readyBuildings,
