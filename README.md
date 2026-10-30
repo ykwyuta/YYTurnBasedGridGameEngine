@@ -117,6 +117,42 @@
 - 敵の駒をクリックすると、その駒の移動範囲と攻撃が届く範囲を確認できます。
 - Esc で選択解除。
 
+## Cloudflare で無料公開する
+
+Cloudflare Workers の静的アセット配信を使います。ビルドは不要で、静的ファイルへのリクエストは無料プランでも無料・無制限です。設定はリポジトリに入っている `wrangler.jsonc` / `.assetsignore` / `_headers` だけです。
+
+### 方法 A：GitHub と連携して自動デプロイ（おすすめ）
+
+1. このブランチを `main` にマージしておく（公開したいブランチを本番ブランチにする）。
+2. [Cloudflare ダッシュボード](https://dash.cloudflare.com/) にログイン（無料アカウントで OK）→ **Workers & Pages** → **作成（Create）** → **リポジトリをインポート（Import a repository）**。
+3. GitHub を連携して `YYTurnBasedGridGameEngine` を選ぶ。
+4. 設定はそのままで構いません。
+   - ビルドコマンド：空欄
+   - デプロイコマンド：`npx wrangler deploy`（既定値）
+   - ルートディレクトリ：`/`
+5. **デプロイ** を押すと `https://tetsuban-sensen.<あなたのサブドメイン>.workers.dev` で公開されます。
+
+以降は本番ブランチに push するたびに自動で再デプロイされます。独自ドメインを使う場合は、Worker の **設定 → ドメインとルート** から追加します。
+
+### 方法 B：手元のパソコンからコマンドで公開
+
+Node.js が入っていれば、リポジトリのルートで次を実行します。
+
+```sh
+npx wrangler login    # 初回のみ。ブラウザで Cloudflare にログイン
+npx wrangler deploy   # 公開（URL が表示される）
+```
+
+公開前に手元で確認したいときは `npx wrangler dev` で http://localhost:8787 に立ち上がります。
+
+### 公開に関係するファイル
+
+| ファイル | 役割 |
+| --- | --- |
+| `wrangler.jsonc` | Worker 名（`tetsuban-sensen`）と、リポジトリのルートを静的サイトとして配信する設定。URL の名前を変えたいときは `name` を書き換える。 |
+| `.assetsignore` | 公開しないファイル（README や設定ファイルなど）。 |
+| `_headers` | キャッシュとセキュリティ関連の HTTP ヘッダー。 |
+
 ## ファイル構成
 
 ```
